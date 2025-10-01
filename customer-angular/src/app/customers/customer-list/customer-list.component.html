@@ -1,0 +1,39 @@
+<div class="customer-list">
+  <h1>Customer List</h1>
+  <div class="search-bar">
+    <input type="text" placeholder="Search customers..." [(ngModel)]="searchQuery" />
+    <button (click)="handleSearch()">Search</button>
+  </div>
+  <div class="add-customer-button">
+    <a [routerLink]="['/customer/add']">Add Customer</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th (click)="handleSort('id')">ID {{ sortBy === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</th>
+        <th (click)="handleSort('firstName')">First Name {{ sortBy === 'firstName' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</th>
+        <th (click)="handleSort('lastName')">Last Name {{ sortBy === 'lastName' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</th>
+        <th (click)="handleSort('email')">Email {{ sortBy === 'email' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</th>
+        <th (click)="handleSort('dateOfBirth')">Date of Birth {{ sortBy === 'dateOfBirth' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</th>
+        <th (click)="handleSort('phone')">Phone {{ sortBy === 'phone' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let customer of customers">
+        <td>{{ customer.id }}</td>
+        <td>{{ customer.firstName }}</td>
+        <td>{{ customer.lastName }}</td>
+        <td>{{ customer.email }}</td>
+        <td>{{ customer.dateOfBirth | date:'dd/MM/yyyy' }}</td>
+        <td>{{ customer.phone }}</td>
+        <td>
+          <button (click)="handleEditCustomer(customer)">Edit</button>
+          <button (click)="handleDelete(customer.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+

@@ -1,0 +1,8 @@
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.csproj.AssemblyReference.cache
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\rpswa.dswa.cache.json
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.GeneratedMSBuildEditorConfig.editorconfig
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.AssemblyInfoInputs.cache
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.AssemblyInfo.cs
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.csproj.CoreCompileInputs.cache
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.MvcApplicationPartsAssemblyInfo.cs
+D:\github\CustomerSearch\CustomerApi\obj\Debug\net9.0\CustomerSearch.Api.MvcApplicationPartsAssemblyInfo.cache
