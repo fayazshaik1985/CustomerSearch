@@ -9,6 +9,13 @@ const CustomerForm = () => {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    dateOfBirth: false,
+    phone: false
+  });
   const [formData, setFormData] = useState({
     id: 0,
     firstName: '',
@@ -52,17 +59,36 @@ const CustomerForm = () => {
     fetchCustomer();
   }, [id]);
 
+  const handleBlur = (e) => {
+    setErrors({ ...errors, [e.target.name]: !e.target.value });
+  };
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [e.target.name]: !e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });    
   };
+  
+  const validate = () => {
+    let newErrors = {};
 
-  const handleDateChange = (date) => {
-    setFormData({ ...formData, dateOfBirth: date });
+    if (!formData.firstName) newErrors.firstName = true;
+    if (!formData.lastName) newErrors.lastName = true;
+    if (!formData.email) newErrors.email = true;
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = true;
+
+    return newErrors;
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const validationErrors = validate();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+     return;
+    }
+    
     try {
       if (!!id) {
         await customerService.updateCustomer(id, formData);
@@ -99,9 +125,12 @@ const CustomerForm = () => {
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
             />
           </label>
+          {errors.firstName && (
+            <div className="error">First name is required.</div>
+          )}
         </div>
         
         <div className="form-group">
@@ -112,9 +141,12 @@ const CustomerForm = () => {
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
             />
           </label>
+          {errors.lastName && (
+            <div className="error">Last name is required.</div>
+          )}
         </div>
         
         <div className="form-group">
@@ -125,9 +157,15 @@ const CustomerForm = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
             />
           </label>
+          {errors.email && (
+            <div className="error">Email is required.</div>
+          )}
+          {formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && (
+            <div className="error">Enter a valid email address.</div>
+          )}
         </div>
         
         <div className="form-group">
@@ -136,10 +174,13 @@ const CustomerForm = () => {
             <input type="date" 
               name="dateOfBirth" 
               value={formData.dateOfBirth} 
-              onChange={handleChange} 
-              required 
+              onChange={handleChange}
+              onBlur={handleBlur}
             />
           </label>
+          {errors.dateOfBirth && (
+            <div className="error">Date of birth is required.</div>
+          )}
         </div>
 
         <div className="form-group">

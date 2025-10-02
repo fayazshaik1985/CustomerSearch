@@ -46,7 +46,15 @@ export class CustomerFormComponent implements OnInit {
   }
 
   handleSubmit(): void {
-    if (this.form.invalid) return;
+    // Mark all fields as touched to show validation errors
+    this.form.markAllAsTouched();
+    
+    if (this.form.invalid) {
+      // Mark form as dirty to indicate user interaction
+      this.form.markAsDirty();
+      return;
+    }
+    
     const payload = this.form.value;
     const request$ = this.id
       ? this.customerService.updateCustomer(this.id, payload)

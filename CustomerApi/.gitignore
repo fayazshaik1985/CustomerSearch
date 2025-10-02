@@ -1,0 +1,30 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# .NET Core
+## Build artifacts
+bin
+obj/
+*.pdb
+*.suo
+*.user
+*.vspscc
+*.vssscc
+*.bak
+*.log
+*.sqlite
+*.sqlitedb
+*.db
+*.DS_Store
+*.orig
+*.scc
+
+## Visual Studio
+.vs/
+*.csproj.user
+*.resharper
+*.resharper.user
+*.dotsettings
+*.dotsettings.user
+*.cache
+*.designer.cs.user
+*.xproj.user

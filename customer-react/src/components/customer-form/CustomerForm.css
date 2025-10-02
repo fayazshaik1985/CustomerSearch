@@ -76,3 +76,9 @@
 .form-actions button[type="button"]:hover {
   background-color: #da190b;
 }
+
+.error {
+  color: #d93025;
+  font-size: 12px;
+  margin-top: 6px;
+}
