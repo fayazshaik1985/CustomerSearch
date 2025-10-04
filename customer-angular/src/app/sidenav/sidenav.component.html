@@ -1,0 +1,30 @@
+<nav class="sidenav" [class.collapsed]="isCollapsed">
+  <div class="sidenav-header">
+    <button class="toggle-btn" (click)="toggleCollapse()" [attr.aria-label]="isCollapsed ? 'Expand navigation' : 'Collapse navigation'">
+      <span class="toggle-icon" [class.rotated]="isCollapsed">☰</span>
+    </button>
+    <div class="nav-title" *ngIf="!isCollapsed">
+      <span>Menu</span>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item" *ngFor="let item of navItems">
+      <a 
+        class="nav-link" 
+        [routerLink]="item.route"
+        [class.active]="item.isActive"
+        [attr.title]="isCollapsed ? item.label : ''"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidenav-footer" *ngIf="!isCollapsed">
+    <div class="footer-info">
+      <small>F Mart v1.0</small>
+    </div>
+  </div>
+</nav>

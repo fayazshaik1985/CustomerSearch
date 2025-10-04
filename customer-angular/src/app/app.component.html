@@ -1,3 +1,18 @@
 <div class="app-container">
-  <router-outlet />
+  <app-sidenav (collapsedStateChanged)="onSidenavCollapsedStateChanged($event)" *ngIf="(dataService.loggedIn$ | async)"></app-sidenav>
+  <div *ngIf="isLoggedIn" class="main-content" [ngClass]="{'collapsed': isSidenavCollapsed, 'not-collapsed': !isSidenavCollapsed}">
+    <app-header [isSidenavCollapsed]="isSidenavCollapsed"></app-header>
+    <main class="content-area">
+      <router-outlet />      
+    </main>
+    <app-footer></app-footer>
+  </div>
+
+  <div *ngIf="!isLoggedIn" class="main-content">
+    <app-header [isSidenavCollapsed]="isSidenavCollapsed"></app-header>
+    <main class="content-area">
+      <router-outlet />      
+    </main>
+    <app-footer></app-footer>
+  </div>
 </div>

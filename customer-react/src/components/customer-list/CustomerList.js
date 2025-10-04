@@ -66,7 +66,7 @@ function CustomerList() {
 
   return (
     <div className="customer-list">
-      <h1>Customer List</h1>
+      {/* <h1>Customer List</h1> */}
       <div className="search-bar">
         <input
           type="text"
