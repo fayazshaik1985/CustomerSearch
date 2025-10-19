@@ -1,34 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import {Link, useNavigate } from 'react-router-dom';
-import { customerService } from '../../services/customerService';
-import './CustomerList.css'; // Import the CSS file
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  fetchCustomers, 
+  deleteCustomer, 
+  selectCustomers,
+  selectLoading,
+  selectError 
+} from '../../store/customer/customerSlice';
+import './CustomerList.css';
 
 function CustomerList() {
   const navigate = useNavigate();
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  
+  // Redux selectors
+  const customers = useSelector(selectCustomers);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+   
+  // Local state for search input
   const [sortBy, setSortBy] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
+  const [sortOrder, setSortOrder] = useState('asc');  
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchCustomers();
-  }, [sortBy, sortOrder]); // Add searchQuery to dependency array
-
-  const fetchCustomers = async () => {
-    try {
-      const data = await customerService.getCustomers({ sortBy, sortOrder, search: searchQuery });
-      setCustomers(data);
-    } catch (error) {
-      setError(error);
-    } finally {
-      setLoading(false);
+    // Load customers when component mounts
+    if (!customers || customers.length === 0) { 
+      dispatch(fetchCustomers({ sortBy:sortBy, sortOrder: sortOrder, search: searchQuery }));
     }
-  };
+  }, [dispatch]);   
 
-   const handleSearch = () => {
-    fetchCustomers();
+  const handleSearch = () => {
+    dispatch(fetchCustomers({ sortBy:sortBy, sortOrder: sortOrder, search: searchQuery }));
   };
 
   const handleSort = (field) => {
@@ -38,6 +42,8 @@ function CustomerList() {
       setSortBy(field);
       setSortOrder('asc');
     }
+
+    dispatch(fetchCustomers({ sortBy:sortBy, sortOrder: sortOrder, search: searchQuery }));
   };
 
   const handleEditCustomer = (customer) => {
@@ -46,12 +52,7 @@ function CustomerList() {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
-      try {
-        await customerService.deleteCustomer(id);
-        fetchCustomers(); // Refresh the list after deletion
-      } catch (error) {
-        setError(error);
-      }
+      dispatch(deleteCustomer(id));
     }
   };
 

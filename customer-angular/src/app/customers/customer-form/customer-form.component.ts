@@ -1,8 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subject, takeUntil, combineLatest } from 'rxjs';
 import { CustomerService } from '../../services/customer.service';
+import { CustomerStoreService } from '../../store/customer/customer.store.service';
 
 @Component({
   selector: 'app-customer-form',
@@ -11,13 +13,19 @@ import { CustomerService } from '../../services/customer.service';
   templateUrl: './customer-form.component.html',
   styleUrls: ['./customer-form.component.css']
 })
-export class CustomerFormComponent implements OnInit {
+export class CustomerFormComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly customerService = inject(CustomerService);
+  private readonly customerStore = inject(CustomerStoreService);
+  private readonly destroy$ = new Subject<void>();
   
   id: string | null = null;
+  loading$: Observable<boolean> = this.customerStore.loading$;
+  error$: Observable<string | null> = this.customerStore.error$;
+  selectedCustomer$: Observable<any> = this.customerStore.selectedCustomer$;
+  
   form = this.fb.group({
     id: 0,
     firstName: ['', Validators.required],
@@ -30,19 +38,35 @@ export class CustomerFormComponent implements OnInit {
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     if (this.id) {
-      this.customerService.getCustomer(this.id).subscribe({
-        next: (customer) => {
-          this.form.patchValue({
-            id: customer.id || 0,
-            firstName: customer.firstName || '',
-            lastName: customer.lastName || '',
-            email: customer.email || '',
-            dateOfBirth: (customer.dateOfBirth || '').split('T')[0],
-            phone: customer.phone || '',
-          });
-        },
-      });
+      // Load customer from store
+      this.customerStore.loadCustomer(this.id);
+      
+      // Subscribe to selected customer from store
+      this.selectedCustomer$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(customer => {
+          if (customer) {
+            this.form.patchValue({
+              id: customer.id || 0,
+              firstName: customer.firstName || '',
+              lastName: customer.lastName || '',
+              email: customer.email || '',
+              dateOfBirth: (customer.dateOfBirth || '').split('T')[0],
+              phone: customer.phone || '',
+            });
+          }
+        });
     }
+    
+    // Clear any previous errors
+    this.customerStore.clearSelectedCustomer();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    // Clear selected customer when leaving the form
+    this.customerStore.clearSelectedCustomer();
   }
 
   handleSubmit(): void {
@@ -56,10 +80,28 @@ export class CustomerFormComponent implements OnInit {
     }
     
     const payload = this.form.value;
-    const request$ = this.id
-      ? this.customerService.updateCustomer(this.id, payload)
-      : this.customerService.addCustomer(payload);
-    request$.subscribe({ next: () => this.router.navigate(['/customers']) });
+    
+    if (this.id) {
+      // Update customer using store
+      this.customerStore.updateCustomer(this.id, payload as any);
+    } else {
+      // Add customer using store
+      this.customerStore.addCustomer(payload as any);
+    }
+    
+    // Subscribe to loading state to navigate when operation completes
+    this.loading$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(loading => {
+        if (!loading) {
+          // Check if there's an error, if not navigate away
+          this.error$.pipe(takeUntil(this.destroy$)).subscribe(error => {
+            if (!error) {
+              this.router.navigate(['/customers']);
+            }
+          });
+        }
+      });
   }
 
   handleCancel(): void {

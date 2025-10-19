@@ -7,6 +7,17 @@
   <div class="add-customer-button">
     <a [routerLink]="['/customer/add']">Add Customer</a>
   </div>
+  
+  <!-- Loading indicator -->
+  <div *ngIf="loading$ | async" class="loading">
+    Loading customers...
+  </div>
+  
+  <!-- Error message -->
+  <div *ngIf="error$ | async as error" class="error">
+    Error: {{ error }}
+  </div>
+  
   <table>
     <thead>
       <tr>
@@ -20,7 +31,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let customer of customers">
+      <tr *ngFor="let customer of customers$ | async">
         <td>{{ customer.id }}</td>
         <td>{{ customer.firstName }}</td>
         <td>{{ customer.lastName }}</td>

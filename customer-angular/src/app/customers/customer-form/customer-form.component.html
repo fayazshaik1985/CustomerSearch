@@ -1,5 +1,16 @@
 <div class="customer-form-page">
   <h1>{{ id ? 'Edit Customer' : 'Add Customer' }}</h1>
+  
+  <!-- Loading indicator -->
+  <div *ngIf="loading$ | async" class="loading">
+    Loading...
+  </div>
+  
+  <!-- Error message -->
+  <div *ngIf="error$ | async as error" class="error-message">
+    Error: {{ error }}
+  </div>
+  
   <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="customer-form">
     <div class="form-group">
       <label>
@@ -47,8 +58,8 @@
       </label>
     </div>
     <div class="form-actions">
-      <button type="submit">Save</button>
-      <button type="button" (click)="handleCancel()">Cancel</button>
+      <button type="submit" [disabled]="loading$ | async">Save</button>
+      <button type="button" (click)="handleCancel()" [disabled]="loading$ | async">Cancel</button>
     </div>
   </form>
 </div>

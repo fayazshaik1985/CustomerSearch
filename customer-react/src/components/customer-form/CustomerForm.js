@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { customerService } from '../../services/customerService';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCustomer, addCustomer, updateCustomer, clearSelectedCustomer, clearError } from '../../store/customer/customerSlice';
 import './CustomerForm.css';
 
 const CustomerForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { selectedCustomer, loading, error } = useSelector(state => ({
+    selectedCustomer: state.customers.selectedCustomer,
+    loading: state.customers.loading,
+    error: state.customers.error
+  }));
+  
   const [errors, setErrors] = useState({
     firstName: false,
     lastName: false,
@@ -26,38 +33,39 @@ const CustomerForm = () => {
   });
 
   useEffect(() => {
-    const fetchCustomer = async () => {
-      if (!!id) {
-        try {
-          const customerData = await customerService.getCustomer(id);
-          setCustomer(customerData);
-          setFormData({
-            id: customerData.id || 0,
-            firstName: customerData.firstName || '',
-            lastName: customerData.lastName || '',
-            email: customerData.email || '',
-            dateOfBirth: customerData.dateOfBirth.split('T')[0],
-            phone: customerData.phone || ''
-          });
-        } catch (error) {
-          setError(error);
-        }
-      } else {
-        // New customer
-        setFormData({
-          id: 0,
-          firstName: '',
-          lastName: '',
-          email: '',
-          dateOfBirth: null,
-          phone: ''
-        });
-      }
-      setLoading(false);
-    };
+    // Clear any previous errors and selected customer
+    //dispatch(clearError());
+    //dispatch(clearSelectedCustomer());
+    
+    if (id) {
+      // Fetch customer using Redux
+      dispatch(fetchCustomer(id));
+    } else {
+      // New customer - reset form
+      setFormData({
+        id: 0,
+        firstName: '',
+        lastName: '',
+        email: '',
+        dateOfBirth: null,
+        phone: ''
+      });
+    }
+  }, [id, dispatch]);
 
-    fetchCustomer();
-  }, [id]);
+  // Update form data when selectedCustomer changes
+  useEffect(() => {
+    if (selectedCustomer && id) {
+      setFormData({
+        id: selectedCustomer.id || 0,
+        firstName: selectedCustomer.firstName || '',
+        lastName: selectedCustomer.lastName || '',
+        email: selectedCustomer.email || '',
+        dateOfBirth: selectedCustomer.dateOfBirth ? selectedCustomer.dateOfBirth.split('T')[0] : '',
+        phone: selectedCustomer.phone || ''
+      });
+    }
+  }, [selectedCustomer, id]);
 
   const handleBlur = (e) => {
     setErrors({ ...errors, [e.target.name]: !e.target.value });
@@ -89,33 +97,33 @@ const CustomerForm = () => {
      return;
     }
     
-    try {
-      if (!!id) {
-        await customerService.updateCustomer(id, formData);
-      } else {
-        await customerService.addCustomer(formData);
-      }
-      navigate('/customers');
-    } catch (error) {
-      setError(error);
+    // Clear any previous errors
+    dispatch(clearError());
+    
+    if (id) {
+      // Update customer using Redux
+      dispatch(updateCustomer({ id, customerData: formData }));
+    } else {
+      // Add customer using Redux
+      dispatch(addCustomer(formData));
     }
   };
 
   const handleCancel = () => {
+    dispatch(clearSelectedCustomer());
     navigate('/customers');
   };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
 
   return (
     <div className="customer-form-page">
       <h1>{!!id ? 'Edit Customer' : 'Add Customer'}</h1>
+      
+      {/* Loading indicator */}
+      {loading && <div className="loading">Loading...</div>}
+      
+      {/* Error message */}
+      {error && <div className="error-message">Error: {error}</div>}
+      
       <form onSubmit={handleSubmit} className="customer-form">
         <div className="form-group">
           <label>
@@ -196,8 +204,8 @@ const CustomerForm = () => {
         </div>
         
         <div className="form-actions">
-          <button type="submit">Save</button>
-          <button type="button" onClick={handleCancel}>Cancel</button>
+          <button type="submit" disabled={loading}>Save</button>
+          <button type="button" onClick={handleCancel} disabled={loading}>Cancel</button>
         </div>
       </form>
     </div>

@@ -1,5 +1,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './store';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import Sidenav from './components/sidenav/Sidenav';
@@ -56,8 +58,9 @@ function App() {
   };  
 
   return (
-    <Router>
-      <div className="App">
+    <Provider store={store}>
+      <Router>
+        <div className="App">
            
         {isLoggedIn && (                      
           <Sidenav onCollapsedStateChanged={handleSidenavCollapse} />          
@@ -110,8 +113,9 @@ function App() {
         </div>
        )}
 
-      </div>
-    </Router>
+        </div>
+      </Router>
+    </Provider>
   );
 }
 
